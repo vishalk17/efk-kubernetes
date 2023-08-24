@@ -18,9 +18,16 @@ spec:
           resources:
             limits:
               memory: 2Gi
-            requests:
-              memory: 1Gi
           ports:
             - containerPort: 9200
             - containerPort: 9300
+          env:
+            #  - name: discovery.type
+            #  value: single-node
+            - name: discovery.seed_hosts         # Add this line
+              value: "192.168.1.8"             # Use the service name
+                #    - name: discovery.seed_providers     # Add this line
+                #   value: "seeds"                     # Use the default value 'seeds'
+            - name: cluster.initial_master_nodes # Add this line
+              value: "192.168.1.8"  # Replace with your pod name
 
