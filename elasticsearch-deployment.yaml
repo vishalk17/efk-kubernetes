@@ -35,7 +35,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            - name: discovery.seed_hosts         # Add this line
-              value: "elasticsearch"             # Use the service name
-            - name: cluster.initial_master_nodes # Add this line
-              value: "elasticsearch"  # Replace with your pod name
+            - name: discovery.seed_hosts         # Replace with your pod name
+              value: "elasticsearch-0"             # if two replica then also add elasticsearch-1 and so on
+            - name: cluster.initial_master_nodes 
+              value: "elasticsearch-0"  # Replace with your pod name
+                                        # if two replica then also add elasticsearch-1 and so on
