@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: elasticsearch
 spec:
@@ -29,6 +29,12 @@ spec:
             - containerPort: 9200
             - containerPort: 9300
           env:
+            - name: cluster.name
+              value: k8s-logs
+            - name: node.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             - name: discovery.seed_hosts         # Add this line
               value: "elasticsearch"             # Use the service name
             - name: cluster.initial_master_nodes # Add this line
