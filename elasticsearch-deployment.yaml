@@ -12,6 +12,13 @@ spec:
       labels:
         app: elasticsearch
     spec:
+      initContainers:
+        - name: sysctl
+          image: busybox
+          command: ['sysctl', '-w', 'vm.max_map_count=262144']
+          securityContext:
+            privileged: true
+
       containers:
         - name: elasticsearch
           image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
@@ -22,12 +29,7 @@ spec:
             - containerPort: 9200
             - containerPort: 9300
           env:
-            #  - name: discovery.type
-            #  value: single-node
             - name: discovery.seed_hosts         # Add this line
-              value: "192.168.1.8"             # Use the service name
-                #    - name: discovery.seed_providers     # Add this line
-                #   value: "seeds"                     # Use the default value 'seeds'
+              value: "elasticsearch"             # Use the service name
             - name: cluster.initial_master_nodes # Add this line
-              value: "192.168.1.8"  # Replace with your pod name
-
+              value: "elasticsearch"  # Replace with your pod name
