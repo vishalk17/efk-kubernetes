@@ -26,6 +26,9 @@ spec:
           resources:
             limits:
               memory: 2Gi
+          volumeMounts:
+            - name: elasticsearch-data
+              mountPath: /usr/share/elasticsearch/data
           ports:
             - containerPort: 9200
             - containerPort: 9300
@@ -36,8 +39,17 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            - name: discovery.seed_hosts         # Replace with your pod name
+            - name: discovery.seed_hosts    # Replace with your pod name
               value: "elasticsearch-0"             # if two replica then also add elasticsearch-1 and so on
-            - name: cluster.initial_master_nodes 
-              value: "elasticsearch-0"  # Replace with your pod name
-                                        # if two replica then also add elasticsearch-1 and so on
+            - name: cluster.initial_master_nodes
+              value: "elasticsearch-0"    # Replace with your pod name
+                                          # if two replica then also add elasticsearch-1 and so on
+  volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+

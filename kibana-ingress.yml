@@ -2,14 +2,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: kibana-ingress
-  namespace: kube-logging
 spec:
   rules:
-    - host: kibana.example.com
+    - host: xyz.vishalk17.com
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          - pathType: Prefix
+            path: "/"
             backend:
               service:
                 name: kibana
