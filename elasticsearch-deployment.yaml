@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+  namespace: kube-logging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      initContainers:
+        - name: sysctl
+          image: busybox
+          command: ['sysctl', '-w', 'vm.max_map_count=262144']
+          securityContext:
+            privileged: true
+
+      containers:
+        - name: elasticsearch
+          image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
+          resources:
+            limits:
+              memory: 2Gi
+          ports:
+            - containerPort: 9200
+            - containerPort: 9300
+          env:
+            - name: cluster.name
+              value: k8s-logs
+            - name: node.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: discovery.seed_hosts         # Replace with your pod name
+              value: "elasticsearch-0"             # if two replica then also add elasticsearch-1 and so on
+            - name: cluster.initial_master_nodes 
+              value: "elasticsearch-0"  # Replace with your pod name
+                                        # if two replica then also add elasticsearch-1 and so on
