@@ -49,6 +49,7 @@ spec:
         name: elasticsearch-data
       spec:
         accessModes: ["ReadWriteOnce"]
+          #storageClassName: ""   #disabled for now.. use default one instead
         resources:
           requests:
             storage: 1Gi
