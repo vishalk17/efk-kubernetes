@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -5,6 +6,7 @@ metadata:
   namespace: kube-logging
   labels:
     app: fluentd
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -22,6 +24,7 @@ rules:
   - get
   - list
   - watch
+
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -54,18 +57,39 @@ spec:
     spec:
       serviceAccount: fluentd
       serviceAccountName: fluentd
+        #  tolerations:                                 # disabled toleration for now
+        #- key: node-role.kubernetes.io/control-plane
+        # effect: NoSchedule
+        #- key: node-role.kubernetes.io/master
+        #effect: NoSchedule
       containers:
       - name: fluentd
-        image: fluent/fluentd-kubernetes-daemonset:v1.4.2-debian-elasticsearch-1.1
+        image: fluent/fluentd-kubernetes-daemonset:v1.16.2-debian-elasticsearch7-1.0
         env:
+          - name: K8S_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
           - name:  FLUENT_ELASTICSEARCH_HOST
-            value: "elasticsearch.kube-logging.svc.cluster.local"
+            value: "elasticsearch.kube-logging.svc.cluster.local"  #internal dns
           - name:  FLUENT_ELASTICSEARCH_PORT
             value: "9200"
           - name: FLUENT_ELASTICSEARCH_SCHEME
             value: "http"
-          - name: FLUENTD_SYSTEMD_CONF
-            value: disable
+          # Option to configure elasticsearch plugin with self signed certs
+          # ================================================================
+          #  - name: FLUENT_ELASTICSEARCH_SSL_VERIFY
+          #  value: "true"
+          # Option to configure elasticsearch plugin with tls
+          # ================================================================
+          # - name: FLUENT_ELASTICSEARCH_SSL_VERSION
+          #  value: "TLSv1_2"
+          # X-Pack Authentication
+          # =====================
+          # - name: FLUENT_ELASTICSEARCH_USER
+          #  value: "elastic"
+          #- name: FLUENT_ELASTICSEARCH_PASSWORD
+          #  value: "changeme"
         resources:
           limits:
             memory: 512Mi
@@ -75,14 +99,24 @@ spec:
         volumeMounts:
         - name: varlog
           mountPath: /var/log
-        - name: varlibdockercontainers
-          mountPath: /var/lib/docker/containers
+        # When actual pod logs in /var/lib/docker/containers, the following lines should be used.
+        # - name: dockercontainerlogdirectory
+        #   mountPath: /var/lib/docker/containers
+        #   readOnly: true
+        # When actual pod logs in /var/log/pods, the following lines should be used.
+        - name: dockercontainerlogdirectory
+          mountPath: /var/log/pods
           readOnly: true
       terminationGracePeriodSeconds: 30
       volumes:
       - name: varlog
         hostPath:
           path: /var/log
-      - name: varlibdockercontainers
+      # When actual pod logs in /var/lib/docker/containers, the following lines should be used.
+      # - name: dockercontainerlogdirectory
+      #   hostPath:
+      #     path: /var/lib/docker/containers
+      # When actual pod logs in /var/log/pods, the following lines should be used.
+      - name: dockercontainerlogdirectory
         hostPath:
-          path: /var/lib/docker/containers
+          path: /var/log/pods
