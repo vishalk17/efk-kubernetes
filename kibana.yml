@@ -6,13 +6,14 @@ metadata:
   labels:
     app: kibana
 spec:
-  type: NodePort
   selector:
     app: kibana
   ports:
+    - protocol: TCP
       port: 5601        # Service port
       targetPort: 5601  # Pod port
-      nodePort: 32000   # Fixed NodePort number
+      nodePort: 30001   # fixed nodePort value
+  type: NodePort
 ---
 apiVersion: apps/v1
 kind: Deployment
