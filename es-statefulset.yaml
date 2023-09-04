@@ -112,7 +112,8 @@ spec:
               value: "1"
       volumes:
         - name: elasticsearch-logging
-          emptyDir: {}
+          hostPath:
+            path: /home/vishal/es-data    #path on host for storing data of es
       # Elasticsearch requires vm.max_map_count to be at least 262144.
       # If your OS already sets up this number to a higher value, feel free
       # to remove this init container.
